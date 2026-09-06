@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تطبيق الحواله - تحويل العملات الرقمية</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <header class="header">
+      <div class="header-content">
+        <h1>💸 تطبيق الحواله</h1>
+        <p>تحويل آمن وسريع للعملات الرقمية عبر الوسيط</p>
+      </div>
+      <div class="wallet-section">
+        <div id="chainStatus" class="chain-status">
+          <span class="dot" id="chainDot"></span>
+          <span id="chainLabel">غير متصل</span>
+        </div>
+        <button id="connectBtn" class="btn-connect">الاتصال بالمحفظة</button>
+        <button id="disconnectBtn" class="btn-disconnect hidden">قطع الاتصال</button>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <div class="content">
+      <!-- CONNECTION VIEW -->
+      <div id="connectView" class="view">
+        <div class="connection-card">
+          <h2>اختر طريقة الاتصال</h2>
+          
+          <div class="connection-options">
+            <button class="connection-btn" id="connectInjectedBtn">
+              <span class="icon">🔐</span>
+              <span class="label">محفظة المتصفح</span>
+              <span class="desc">MetaMask, Trust Wallet, Coinbase</span>
+            </button>
+
+            <button class="connection-btn" id="connectWcBtn">
+              <span class="icon">📱</span>
+              <span class="label">WalletConnect</span>
+              <span class="desc">أي محفظة جوال</span>
+            </button>
+
+            <button class="connection-btn" id="watchBtn">
+              <span class="icon">👁️</span>
+              <span class="label">عرض فقط</span>
+              <span class="desc">عرض رصيد بدون إرسال</span>
+            </button>
+          </div>
+
+          <div id="connectMsg"></div>
+        </div>
+      </div>
+
+      <!-- MAIN VIEW -->
+      <div id="mainView" class="view hidden">
+        <div class="main-grid">
+          <!-- SIDEBAR -->
+          <aside class="sidebar">
+            <div class="account-card">
+              <div class="account-header">
+                <h3>محفظتك</h3>
+              </div>
+              <div class="account-info">
+                <div class="account-addr">
+                  <span class="label">العنوان:</span>
+                  <span id="accountAddr" class="addr">0x...</span>
+                  <button id="copyAddrBtn" class="btn-copy">📋</button>
+                </div>
+              </div>
+              <div class="balance-box">
+                <div class="balance-item">
+                  <span class="label">رصيد BNB:</span>
+                  <span id="bnbBalance" class="value">0.00</span>
+                </div>
+              </div>
+              <div id="walletKindNote" class="wallet-note"></div>
+            </div>
+
+            <nav class="nav-menu">
+              <button class="nav-btn active" data-view="remittance">
+                ↔️ الحواله
+              </button>
+              <button class="nav-btn" data-view="broker">
+                🏢 الوسيط
+              </button>
+              <button class="nav-btn" data-view="history">
+                📜 السجل
+              </button>
+              <button class="nav-btn" data-view="tokens">
+                💎 العملات
+              </button>
+            </nav>
+          </aside>
+
+          <!-- MAIN PANELS -->
+          <main class="panels">
+            <!-- REMITTANCE VIEW -->
+            <div id="view-remittance" class="panel active">
+              <h2>إرسال حواله</h2>
+              
+              <div class="form-section">
+                <h3>بيانات الحواله</h3>
+                
+                <div class="form-group">
+                  <label>نوع العملة</label>
+                  <select id="remitAsset">
+                    <option value="native">BNB (الأصلية)</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label>المبلغ</label>
+                  <div class="amount-input">
+                    <input type="number" id="remitAmount" placeholder="0.0" step="0.0001" min="0">
+                    <button class="btn-max" id="maxBtn">الكل</button>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label>المستقبل</label>
+                  <input type="text" id="remitRecipient" placeholder="عنوان المستقبل أو بيانات الهاتف">
+                </div>
+
+                <div class="form-group">
+                  <label>اختر وسيط</label>
+                  <select id="brokerSelect">
+                    <option value="">-- اختر وسيط --</option>
+                  </select>
+                  <button class="btn-info" id="brokerInfoBtn">ℹ️ معلومات الوسيط</button>
+                </div>
+
+                <div class="fee-info">
+                  <div class="fee-row">
+                    <span>المبلغ الأساسي:</span>
+                    <span id="feeBase">0.00</span>
+                  </div>
+                  <div class="fee-row">
+                    <span>عمولة الوسيط:</span>
+                    <span id="feeBroker">0.00</span>
+                  </div>
+                  <div class="fee-row">
+                    <span>رسوم الشبكة (Gas):</span>
+                    <span id="feeGas">0.00</span>
+                  </div>
+                  <div class="fee-row total">
+                    <span>الإجمالي:</span>
+                    <span id="feeTotal">0.00</span>
+                  </div>
+                </div>
+
+                <button class="btn-primary" id="sendRemitBtn">إرسال الحواله</button>
+                <div id="remitStatus"></div>
+              </div>
+            </div>
+
+            <!-- BROKER VIEW -->
+            <div id="view-broker" class="panel">
+              <h2>إدارة الوسيط</h2>
+              
+              <div class="form-section">
+                <h3>بيانات الوسيط</h3>
+                
+                <div class="form-group">
+                  <label>اسم الوسيط</label>
+                  <input type="text" id="brokerName" placeholder="مثال: أحمد للحواله">
+                </div>
+
+                <div class="form-group">
+                  <label>عنوان المحفظة (الوسيط)</label>
+                  <input type="text" id="brokerAddr" placeholder="0x...">
+                </div>
+
+                <div class="form-group">
+                  <label>نسبة العمولة (%)</label>
+                  <input type="number" id="brokerFeeRate" placeholder="2.5" step="0.1" min="0" max="100">
+                </div>
+
+                <div class="form-group">
+                  <label>رقم الهاتف</label>
+                  <input type="tel" id="brokerPhone" placeholder="+966501234567">
+                </div>
+
+                <button class="btn-primary" id="addBrokerBtn">تسجيل وسيط</button>
+                <div id="brokerStatus"></div>
+              </div>
+
+              <div class="form-section">
+                <h3>الوسطاء المسجلين</h3>
+                <div id="brokerList" class="broker-list"></div>
+              </div>
+            </div>
+
+            <!-- HISTORY VIEW -->
+            <div id="view-history" class="panel">
+              <h2>سجل المعاملات</h2>
+              
+              <div class="history-filters">
+                <select id="historyFilter">
+                  <option value="all">الكل</option>
+                  <option value="sent">المرسلة</option>
+                  <option value="received">المستقبلة</option>
+                  <option value="pending">قيد الانتظار</option>
+                  <option value="completed">المكتملة</option>
+                </select>
+                <button class="btn-secondary" id="refreshHistoryBtn">تحديث</button>
+              </div>
+
+              <div id="historyList" class="history-list"></div>
+            </div>
+
+            <!-- TOKENS VIEW -->
+            <div id="view-tokens" class="panel">
+              <h2>إدارة العملات</h2>
+              
+              <div class="form-section">
+                <h3>إضافة عملة جديدة</h3>
+                
+                <div class="form-group">
+                  <label>عنوان العقد (Token Address)</label>
+                  <input type="text" id="newTokenAddr" placeholder="0x...">
+                </div>
+
+                <button class="btn-primary" id="addTokenBtn">إضافة عملة</button>
+                <div id="tokenStatus"></div>
+              </div>
+
+              <div class="form-section">
+                <h3>العملات المضافة</h3>
+                <div id="tokenList" class="token-list"></div>
+              </div>
+            </div>
+          </main>
+        </div>
+      </div>
+    </div>
+
+    <!-- QR CODE MODAL -->
+    <div id="qrModal" class="modal hidden">
+      <div class="modal-content">
+        <button class="modal-close" id="qrModalClose">&times;</button>
+        <h2>استقبال عملة</h2>
+        <div id="qrBox" class="qr-box"></div>
+        <div class="qr-info">
+          <label>عنوان محفظتك:</label>
+          <div class="address-display">
+            <input type="text" id="qrAddr" readonly>
+            <button id="qrCopyBtn" class="btn-copy">نسخ</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.1/ethers.umd.min.js"></script>
+  <script src="config.js"></script>
+  <script src="wallet.js"></script>
+  <script src="remittance.js"></script>
+  <script src="broker.js"></script>
+  <script src="ui.js"></script>
+</body>
+</html>
